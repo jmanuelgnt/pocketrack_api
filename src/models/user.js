@@ -1,8 +1,8 @@
 const Sequelize = require('sequelize');
-const db = require('../db/config')
+const db = require('../db/config');
 
 const User = db.define('user',{
-    userId : {
+    id : {
         type: Sequelize.STRING,
         primaryKey:true,
         allowNull : false,

@@ -14,7 +14,7 @@ router.post('/users', async(req, res) => {
 })
 
 router.get('/users/me',firebaseAuth,(req, res) => {
-    res.send(req.user)
+    res.send({valid:true,user:req.user})
 })
 
 module.exports = router

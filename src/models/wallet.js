@@ -1,5 +1,7 @@
 const Sequelize = require('sequelize');
-const db = require('../db/config')
+const db = require('../db/config');
+const Currency = require('./currency');
+const User = require('./user');
 
 const Wallet = db.define('wallet',{
     id : {
@@ -17,14 +19,6 @@ const Wallet = db.define('wallet',{
             }
         }
     },
-    currency : {
-        type: Sequelize.STRING,
-        validate:{
-            notEmpty:{
-                msg : 'El valor no puede ser vacío'
-            }
-        }
-    },
     description : {
         type: Sequelize.STRING
     },
@@ -36,5 +30,10 @@ const Wallet = db.define('wallet',{
     }
 
 })
+
+Wallet.belongsTo(Currency)
+Wallet.belongsTo(User,{foreignKey:'userId'})
+User.hasMany(Wallet)
+Currency.hasMany(Wallet)
 
 module.exports = Wallet

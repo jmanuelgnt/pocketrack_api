@@ -3,6 +3,7 @@ const cors = require('cors')({origin:true})
 const userRouter = require('./routers/user')
 const walletRouter = require('./routers/wallet')
 const currencyRouter = require('./routers/currency')
+const categoryRouter = require('./routers/category')
 const db = require('./db/config')
 
 //Init express
@@ -21,11 +22,12 @@ db.authenticate().then( () => {
 })
 
 db.sync({alter:true}).then(() => console.log('DB Sync')).catch(() => console.log('Not Sync'))
+//db.sync({force:true}).then(() => console.log('DB Sync')).catch(() => console.log('Not Sync'))
 
 //controllers
 app.use(userRouter)
 app.use(walletRouter)
 app.use(currencyRouter)
-
+app.use(categoryRouter)
 
 module.exports = app

@@ -4,7 +4,7 @@ const userRouter = require('./routers/user')
 const walletRouter = require('./routers/wallet')
 const currencyRouter = require('./routers/currency')
 const categoryRouter = require('./routers/category')
-const Transaction = require('./models/transaction')
+const transactionRouter = require('./routers/transaction')
 const db = require('./db/config')
 
 //Init express
@@ -31,5 +31,6 @@ app.use(userRouter)
 app.use(walletRouter)
 app.use(currencyRouter)
 app.use(categoryRouter)
+app.use(transactionRouter)
 
 module.exports = app

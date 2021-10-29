@@ -60,14 +60,7 @@ router.patch("/categories/:id", firebaseAuth,async (req,res) => {
     }
     const categoryId = req.params.id
     try {
-        const category = await Category.findByPk(categoryId, {
-            where : {
-                [Op.or] : [
-                    {owner : req.user.id},
-                    {owner : null}
-                ]
-            }
-        })
+        const category = await Category.findByPk(categoryId)
         if(!category){
             return res.status(404).send({valid:false})
         }

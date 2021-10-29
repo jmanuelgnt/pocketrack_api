@@ -25,18 +25,12 @@ const Transaction = db.define('transactions',{
         validate : {
             isDecimal : {
                 msg : "Ingrese un monto válido"
-            },
-            isPositiveNumber(value){
-                if(value < 0){
-                    throw new Error("El monto no puede ser negativo")
-                }
             }
         }
     },
     istransfer : {
-        type : DataTypes.ENUM({
-            values : ["0","1"]
-        })
+        type : DataTypes.BOOLEAN,
+        allowNull:false
     },
 })
 

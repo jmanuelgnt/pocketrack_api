@@ -25,6 +25,15 @@ const Currency = db.define('currency',{
                 msg : 'El valor no puede ser vacío'
             }
         }
+    },
+    symbol : {
+        type: Sequelize.STRING,
+        allowNull : false,
+        validate:{
+            notEmpty:{
+                msg : 'El valor no puede ser vacío'
+            }
+        }
     }
 })
 

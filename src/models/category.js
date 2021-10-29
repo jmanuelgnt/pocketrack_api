@@ -1,4 +1,4 @@
-const Sequelize = require('sequelize');
+const {Sequelize, DataTypes} = require('sequelize');
 const db = require('../db/config')
 
 const Category = db.define('categories',{
@@ -18,7 +18,7 @@ const Category = db.define('categories',{
         }
     },
     transactionType : {
-        type: Sequelize.STRING,
+        type: DataTypes.ENUM(['income','outcome']),
         allowNull : false,
         validate:{
             notEmpty:{
@@ -26,6 +26,10 @@ const Category = db.define('categories',{
             }
         }
     },
+    owner : {
+        type : DataTypes.STRING,
+        allowNull:true
+    }
 })
 
 module.exports = Category

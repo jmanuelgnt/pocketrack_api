@@ -2,7 +2,6 @@
 node_modules/
 
 #Configuration directories
-config/
 keys/
 
 # Optional npm cache directory

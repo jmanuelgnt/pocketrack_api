@@ -9,6 +9,10 @@ module.exports = new Sequelize(
     host:process.env.DB_HOST,
     port:process.env.DB_PORT,
     dialect:'postgres',
+    dialectOptions : {
+        useUTC : false
+    },
+    timezone : '-06:00',
     pool: {
         max:5,
         min:0,

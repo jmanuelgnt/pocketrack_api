@@ -32,6 +32,10 @@ const Transaction = db.define('transactions',{
         type : DataTypes.BOOLEAN,
         allowNull:false
     },
+    transactionDate : {
+        type : DataTypes.DATEONLY,
+        allowNull:false
+    }
 })
 
 Transaction.belongsTo(Category)

@@ -10,6 +10,9 @@ const Wallet = require('../models/wallet');
 router.post('/transactions', firebaseAuth, async (req,res) => {
     try {
         if(typeof req.body.ammount == "number"){
+            if(req.body.ammount < 0){
+                return res.status(400).send({valid:false,error:"Ammount must be a positive number!"})
+            }
             const category = await Category.findByPk(req.body.categoryId)
             if(category.transactionType == "outcome"){
                 req.body.ammount = req.body.ammount * -1
@@ -32,8 +35,26 @@ router.get('/transactions', firebaseAuth, async(req,res) => {
     if(req.query.category){
         whereStatement.categoryId = req.query.category
     }
+    const dateRange = []
+    if(req.query.fromDate){
+        let isValidDate = Date.parse(req.query.fromDate)
+        if(isNaN(isValidDate)){
+            return res.status(400).send({valid:false,error:"fromDate is not valid. Must be YYYY-MM-DD"})
+        }
+        dateRange.push(req.query.fromDate)
+    }
+    if(req.query.toDate){
+        let isValidDate = Date.parse(req.query.toDate)
+        if(isNaN(isValidDate)){
+            return res.status(400).send({valid:false,error:"fromDate is not valid. Must be YYYY-MM-DD"})
+        }
+        dateRange.push(req.query.toDate)
+    }
+    if(dateRange.length == 2){
+        whereStatement.transactionDate = {[Op.between] : dateRange}
+    }
     try {
-        const transactions = await Transaction.findAndCountAll({
+        const transactions = await Transaction.findAll({
             include : [{
                 model : Category,
                 attributes : ["category","transactionType"]
@@ -80,5 +101,67 @@ router.get("/transactions/:id",firebaseAuth,async(req,res) => {
         res.status(400).send({valid:false})
     }
 })
+
+router.patch("/transactions/:id", firebaseAuth, async (req, res) => {
+    //validation for valid updates
+    const fieldsToUpdate = Object.keys(req.body)
+    const allowedUpdates = ["note","ammount","categoryId","walletId","transactionDate"]
+    const allowedToUpdate = fieldsToUpdate.every((field) => allowedUpdates.includes(field))
+    if(!allowedToUpdate){
+        return res.status(400).send({valid:false, error : "Invalid Updates"})
+    }
+    //validation of ammount
+    if(typeof req.body.ammount == "number"){
+        if(req.body.ammount < 0){
+            return res.status(400).send({valid:false,error:"Ammount must be a positive number!"})
+        }
+        const category = await Category.findByPk(req.body.categoryId)
+        if(category.transactionType == "outcome"){
+            req.body.ammount = req.body.ammount * -1
+        }
+    }
+    const transactionId = req.params.id
+    try {
+        const transaction = await Transaction.findByPk(transactionId)
+        if(!transaction){
+            return res.status(404).send({valid:false})
+        }
+        fieldsToUpdate.forEach((field) => {transaction[field] = req.body[field]})
+        await transaction.save();
+        res.status(200).send({valid:true,transaction})
+    } catch (error) {
+        res.status(400).send({valid:false,error})
+    }
+})
+
+router.delete("/transactions/:id", firebaseAuth, async (req,res)=>{
+    const transactionId = req.params.id
+    try {
+        const destroyedNumber = await Transaction.destroy({
+            where : {id:transactionId}
+        })
+        if(destroyedNumber){
+            return res.status(200).send({valid:true})
+        }
+        res.status(404).send({valid:false})
+    } catch (error) {
+        res.status(400).send({valid:false,error})
+    }
+})
+
+/*
+PENDIENTE
+
+crear transacciones
+editar transacciones
+
+*agregar fecha de transacción, para que se ingrese manualmente
+
+resumen de transacciones por periodo
+¿el total que se calcule en el frontend?
+¿enviar una variable adicional con el total ya calculado?
+¿endpoint diferente resumido por cada wallet? -> {waletid:1,transactions:{}}
+
+*/
 
 module.exports = router

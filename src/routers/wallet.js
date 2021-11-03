@@ -32,11 +32,12 @@ router.get('/wallets',firebaseAuth, async(req,res) => {
 })
 
 router.get('/wallets/:id',firebaseAuth, async(req,res) => {
-    const currencyId = req.params.id
+    const walletId = req.params.id
     try {
-        const wallet = await Wallet.findByPk(currencyId,{
+        const wallet = await Wallet.findOne({
             where : {
-                userId : req.user.id
+                id : walletId,
+                userId : req.user.id,
             },
             include : [User,Currency]
         })

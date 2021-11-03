@@ -20,10 +20,6 @@
     "start": "node src/index.js",
     "dev": "nodemon src/index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/jmanuelgnt/pocketrack_api.git"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

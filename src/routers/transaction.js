@@ -15,8 +15,10 @@ router.post('/transactions', firebaseAuth, async (req,res) => {
             }
             const category = await Category.findByPk(req.body.categoryId)
             if(category.transactionType == "outcome"){
-                req.body.ammount = req.body.ammount * -1
+                req.body.ammount = parseFloat(req.body.ammount) * -1
             }
+        }else{
+            res.status(400).send({valid:false,error:"Ammount must be a positive number!"})
         }
         const newTransaction = Transaction.build(req.body)
         await newTransaction.save()
@@ -29,6 +31,10 @@ router.post('/transactions', firebaseAuth, async (req,res) => {
 //filtro por query, para buscar por ?note=searchString&category=1
 router.get('/transactions', firebaseAuth, async(req,res) => {
     const whereStatement = {}
+    const whereStatemenForWallet = {userId : req.user.id}
+    if(req.query.wallet){
+        whereStatement.walletId = req.query.wallet
+    }
     if(req.query.note){
         whereStatement.note = {[Op.like] : `%${req.query.note}%`}
     }
@@ -65,11 +71,10 @@ router.get('/transactions', firebaseAuth, async(req,res) => {
                     model : Currency,
                     attributes : ["currency","symbol"]
                 }],
-                where : {
-                    userId : req.user.id
-                }
+                where : whereStatemenForWallet
             }],
-            where : whereStatement
+            where : whereStatement,
+            order : [['transactionDate','DESC']]
         })
         res.status(200).send({valid:true,transactions})
     } catch (error) {

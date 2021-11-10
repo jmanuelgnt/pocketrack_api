@@ -37,4 +37,14 @@ const Currency = db.define('currency',{
     }
 })
 
+Currency.sync().then(()=>{
+    Currency.create({ currency: "USD", currencyName: "Dólar de los Estados Unidos", symbol: "$" })
+    Currency.create({ currency: "EUR", currencyName: "Euro", symbol: "€" })
+    Currency.create({ currency: "JPY", currencyName: "Yen Japonés", symbol: "¥" })
+    Currency.create({ currency: "GBP", currencyName: "Libra esterlina", symbol: "£" })
+    Currency.create({ currency: "AUD", currencyName: "Dólar Australiano", symbol: "A$" })
+    Currency.create({ currency: "CAD", currencyName: "Dólar Canadiense", symbol: "C$" })
+    Currency.create({ currency: "MXN", currencyName: "Peso Mexicano", symbol: "$" })
+})
+
 module.exports = Currency

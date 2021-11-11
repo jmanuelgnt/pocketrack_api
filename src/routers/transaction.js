@@ -6,6 +6,7 @@ const Category = require('../models/category');
 const Currency = require('../models/currency');
 const Transaction = require('../models/transaction');
 const Wallet = require('../models/wallet');
+const currencyUtils = require('../utils/currencyConverter')
 
 router.post('/transactions', firebaseAuth, async (req,res) => {
     try {
@@ -25,6 +26,73 @@ router.post('/transactions', firebaseAuth, async (req,res) => {
         res.status(200).send({valid:true,newTransaction})
     } catch (error) {
         res.status(400).send({valid:false,error})
+    }
+})
+
+router.post('/transactions/transfer', firebaseAuth,async(req,res)=>{
+    /*
+    walletOrigin
+    walletDestination
+    ammount
+    note
+    date
+    isTransfer
+     */
+    if(req.body.walletOrigin && req.body.walletDestination && req.body.ammount && req.body.note && req.body.date && req.body.isTransfer && typeof req.body.ammount == "number"){
+        if(req.body.ammount < 0){
+            return res.status(400).send({valid:false,error:"Ammount must be a positive number!"})
+        }
+        const origin = await Wallet.findOne({
+            include : [{
+                model : Currency,
+                attributes : ["currency","symbol"]
+            }],
+            where : {
+                id : req.body.walletOrigin,
+                userId : req.user.id
+            }
+        })
+        const destiny = await Wallet.findOne({
+            include : [{
+                model : Currency,
+                attributes : ["currency","symbol"]
+            }],
+            where : {
+                id : req.body.walletDestination,
+                userId : req.user.id
+            }
+        })
+        if(!destiny || !origin){
+            return res.status(400).send({valid:false,error:"Invalid input data"})
+        }
+        const changeRate = await currencyUtils.convert(req.body.ammount,origin.currency.currency,destiny.currency.currency)
+        //outcome
+        const originTransaction = Transaction.build({
+            note: `Transferencia: [${req.body.note}] Desde: [${origin.walletName}] Hacia: [${destiny.walletName}] Tasa de cambio: [${origin.currency.currency}->${destiny.currency.currency}:${changeRate}]`,
+            ammount: parseFloat(req.body.ammount) * -1,
+            istransfer:true,
+            transactionDate: req.body.date,
+            categoryId: 99,
+            walletId : req.body.walletOrigin
+        })
+        //income
+        const destinyTransaction = Transaction.build({
+            note: `Transferencia: [${req.body.note}] Desde: [${origin.walletName}] Hacia: [${destiny.walletName}] Tasa de cambio: [${origin.currency.currency}->${destiny.currency.currency}:${changeRate}]`,
+            ammount: Math.round((changeRate * parseFloat(req.body.ammount)) * 100) / 100,
+            istransfer:true,
+            transactionDate: req.body.date,
+            categoryId: 66,
+            walletId : req.body.walletDestination
+        })
+        try {
+            await originTransaction.save()
+            await destinyTransaction.save()
+        } catch (error) {
+            return res.status(400).send({valid:false,error})
+        }
+        res.status(200).send({valid:true,transaction:`Transferencia: [${req.body.note}] Desde: [${origin.walletName}] Hacia: [${destiny.walletName}] Tasa de cambio: [${origin.currency.currency}->${destiny.currency.currency}:${changeRate}]`})
+    }else{
+        res.status(400).send({valid:false,error:"Invalid input data"})
     }
 })
 

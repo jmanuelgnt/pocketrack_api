@@ -1,0 +1,24 @@
+# BUILD
+# docker build -t jmanuelgnt/backend:0.1.0 -f DockerFile .
+#RUN
+#docker run -p 8080:8080 -d backend:0.1.0
+#FOR DB 
+#docker run -p 5431:5432 -e POSTGRES_PASSWORD=root_mysecret -d postgres:14.0
+FROM node:14.18.1
+
+COPY . /opt/app
+
+WORKDIR /opt/app
+
+RUN npm install
+
+EXPOSE 8080
+
+ENV DB_HOST=localhost \
+    DB_NAME=postgres \
+    DB_USER=postgres \
+    DB_PASS=mypassword \
+    DB_PORT=5432 \
+    PORT=8080
+
+CMD [ "npm", "start" ]
